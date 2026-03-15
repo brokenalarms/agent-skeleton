@@ -20,6 +20,7 @@
 - Testing `returncode == 0` is not testing behavior — it only confirms the script didn't crash. Test the actual effect.
 - Similarly, testing `result.stdout` reveals nothing but what the logs said. Assert actual file state, data changes, or structured output rather than log strings.
 - Regression tests should assert actual state before and after, not just exit codes or stdout. Structure as "record before → run → compare after" with human-readable expected vs actual diffs.
+- **Prove causality by isolating the variable.** When a test claims that a specific attribute or property causes a behavior change it must assert the behavior is absent WITHOUT that variable, then assert it is present WITH it. The delta between the two assertions is what proves that specific variable is the cause, and not some other part of the test setup. Skip the negative case only when the fixture inherently has a single variable (e.g., pure function tests).
 
 ## Running tests
 
