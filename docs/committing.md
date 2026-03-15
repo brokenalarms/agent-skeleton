@@ -47,6 +47,7 @@ To detect whether your branch was squash-merged, use a diff:
 
 ### Creating the PR
 
+- Every time before you create a PR, you will need to pull in the latest from main, and check that the branch was not already merged. If so, this branch is dead, and you shouldn't just push the latest to the PR-merged branch, but create a new branch and PR.
 - After pushing, always create the PR with `gh pr create` — this supports full markdown bodies without URL-encoding issues.
 - PR title and body follow the same format as commit messages: imperative title (lowercase, no period), concise bullet-list body covering **why**, **how**, and test coverage.
 - The PR description should encapsulate the sum of all commits in the PR, not repeat each one individually.
