@@ -20,7 +20,13 @@
 - Testing `returncode == 0` is not testing behavior — it only confirms the script didn't crash. Test the actual effect.
 - Similarly, testing `result.stdout` reveals nothing but what the logs said. Assert actual file state, data changes, or structured output rather than log strings.
 - Regression tests should assert actual state before and after, not just exit codes or stdout. Structure as "record before → run → compare after" with human-readable expected vs actual diffs.
-- **Prove causality by isolating the variable.** When a test claims that a specific attribute or property causes a behavior change it must assert the behavior is absent WITHOUT that variable, then assert it is present WITH it. The delta between the two assertions is what proves that specific variable is the cause, and not some other part of the test setup. Skip the negative case only when the fixture inherently has a single variable (e.g., pure function tests).
+- **Prove causality by isolating the variable.** When a test claims that a specific attribute or property causes a behavior change, it must follow a two-phase structure:
+  1. **Base case (without the variable):** Assert the behavior is absent. This establishes that the test fixture alone does not produce the behavior.
+  2. **Test case (with the variable):** Add only the variable under test and assert the behavior is now present.
+
+  The delta between these two assertions is the proof. If a test only asserts the end state, it proves nothing — the behavior could be caused by any part of the fixture, not the variable the test claims to be testing. Skip the base case only when the fixture inherently has a single variable (e.g., a pure function with one input, or an element with a single attribute).
+
+  Before modifying existing filters or rules, ensure there are tests documenting WHY they exist so regressions are caught. Tests should explain the reasoning behind each rule (e.g., "elementsFromPoint filters popups — this test proves it"), not just assert behavior.
 
 ## Running tests
 

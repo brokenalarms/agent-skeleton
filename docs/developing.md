@@ -17,6 +17,7 @@ For bug fix workflow:
 - Prefer declarative structure up front (e.g. a config object, map, or table) that then calls a single utility function, rather than imperative branching logic.
 - Use early exits (`guard`, early `return`, `continue`) rather than large nested `if` blocks.
 - Prefer functional composition where possible. Avoid over-extraction — don't extract single-line utilities unless the function serves as a source of truth (e.g. a string composition function that defines a canonical format used across the app).
+- When moving functions or types to a new file, update all existing import sites to point to the new location. Do not re-export from the old location as a compatibility shim — that creates dead indirection and hides the real dependency graph.
 - Small targeted refactors are encouraged as part of a PR if you spot something that would be notably improved, or if changes are becoming increasingly brittle and would benefit from an architectural refactor first.
 
 ## Environment awareness
