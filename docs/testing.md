@@ -7,6 +7,7 @@
 - Tests should not be updated to cater to broken behavior, unless we are specifically using TDD (break test first, confirm expected failure, then write the feature to fix it).
 - Every commit that changes code for a feature or bug fix must be backed by a test covering that change. Exceptions: animations, purely visual changes, and other inherently UI-based fixes that can't be meaningfully asserted in a test.
 - When you change something, clean up after yourself. Do not leave dead code with a comment like "this isn't being used anymore but it's harmless." Remove it.
+- If you can take a human out of the test loop and test changes yourself, so much the better. Use `playwright` or the equivalent for your project to visually verify the changes.
 
 ## Writing tests
 
