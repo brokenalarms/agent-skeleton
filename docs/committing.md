@@ -53,4 +53,14 @@ To detect whether your branch was squash-merged, use a diff:
 - The PR description should encapsulate the sum of all commits in the PR, not repeat each one individually.
 - If subsequent commits are added to a PR, update the PR title/body with `gh pr edit` to reflect the full scope of changes.
 - It is up to the user to work through stacks and merge them. Never merge a PR to main without asking first.
-- If making any visual changes, wherever possible, try to use Playwright or similar to screenshot the changes and add them to the description of the PR 
+- If making any visual changes, wherever possible, try to use Playwright or similar to screenshot the changes and add them to the description of the PR
+
+### Keeping PRs up to date
+
+After every push to a PR branch, check whether GitHub reports conflicts or the branch is behind main. If so, rebase and force-push:
+
+1. `git fetch origin main`
+2. `git rebase origin/main` (or `--update-refs` for stacked branches)
+3. `git push --force-with-lease`
+
+This is equivalent to clicking GitHub's "Update branch" button but uses rebase instead of merge. You can also do it via the API: `gh api repos/OWNER/REPO/pulls/NUMBER/update-branch -X PUT -f update_method=rebase`. Do this proactively after every push — don't wait for merge conflicts to be reported.
