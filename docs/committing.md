@@ -53,3 +53,4 @@ To detect whether your branch was squash-merged, use a diff:
 - The PR description should encapsulate the sum of all commits in the PR, not repeat each one individually.
 - If subsequent commits are added to a PR, update the PR title/body with `gh pr edit` to reflect the full scope of changes.
 - It is up to the user to work through stacks and merge them. Never merge a PR to main without asking first.
+- If making any visual changes, wherever possible, try to use Playwright or similar to screenshot the changes and add them to the description of the PR 
