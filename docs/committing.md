@@ -10,6 +10,7 @@ Before any commit or push action, every session:
 4. Never do any work on a branch that was squash-merged; GitHub closes that branch's PR and new commits become inaccessible through it.
 5. `git branch -r --merged` does NOT detect squash merges — always use the diff-based method below.
 6. You don't need to ask for permission to pull new content in from main and run local git commands, besides final pushes.
+7. If you ever need to amend a commit, ALWAYS check first that that commit has not already been pushed, so you don't create a divergence. Create a new commit rather than amend if it has.
 
 ## Commits
 
