@@ -20,6 +20,10 @@ For bug fix workflow:
 - When moving functions or types to a new file, update all existing import sites to point to the new location. Do not re-export from the old location as a compatibility shim — that creates dead indirection and hides the real dependency graph.
 - Small targeted refactors are encouraged as part of a PR if you spot something that would be notably improved, or if changes are becoming increasingly brittle and would benefit from an architectural refactor first.
 
+## API integration
+
+- Never assume the shape of an API response. Before writing code against a third-party API, make a test call with a real payload and inspect what it actually returns. Do not guess property names, nesting, or the presence of flags — APIs frequently omit fields you'd expect or structure them differently than the docs suggest.
+
 ## Environment awareness
 
 - You may be in a macOS or Linux environment. If commands don't work when you first run them, note which ones work for which environment.
