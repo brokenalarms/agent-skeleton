@@ -22,6 +22,8 @@ Before any commit or push action, every session:
 - Related atomic commits may be grouped into a single PR.
 - Every commit that changes code for a feature or bug fix must be backed by a test covering that change.
 - Never commit without first running tests and confirming they pass.
+- After making code changes, commit immediately before running the full test suite. A WIP commit prevents work loss if the process is terminated. If tests fail, fix and commit again — do not amend the previous commit.
+- If the dev environment supports it (package.json, Makefile, cargo, xcodegen), run a build to verify compilation before committing, and make sure that any auto-generated project files (e.g., .xcodeproj) are up to date with the changes.
 - One branch per PR — never reuse a branch that has already been merged into main; create a new branch for each new PR. Multiple commits on the same session branch are fine as long as they belong to the same open PR.
 
 ## Rebasing

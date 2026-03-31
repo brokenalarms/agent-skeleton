@@ -23,10 +23,33 @@ Prefer compositional orchestrators that tell a readable story. The orchestrator 
 ## Code style
 
 - Prefer declarative structure up front (e.g. a config object, map, or table) that then calls a single utility function, rather than imperative branching logic.
+- Prefer a declarative functional style: build up requirements in a struct through the function lifecycle, then call a single function to produce the result. Avoid imperative mutation scattered through function bodies.
 - Use early exits (`guard`, early `return`, `continue`) rather than large nested `if` blocks.
+- Functions with 3+ parameters should use a named options struct. No positional string juggling.
 - Prefer functional composition where possible. Avoid over-extraction — don't extract single-line utilities unless the function serves as a source of truth (e.g. a string composition function that defines a canonical format used across the app).
 - When moving functions or types to a new file, update all existing import sites to point to the new location. Do not re-export from the old location as a compatibility shim — that creates dead indirection and hides the real dependency graph.
 - Small targeted refactors are encouraged as part of a PR if you spot something that would be notably improved, or if changes are becoming increasingly brittle and would benefit from an architectural refactor first.
+- Single source of truth: flag definitions, log prefixes, prompt templates, config keys — each defined in one place. No duplication across code and config.
+
+## Silent failures
+
+Look for and eliminate: errors swallowed without logging, functions that return nil/null on failure without signaling why, conditions that skip work without explanation. Every error path should either handle the error meaningfully or propagate it — never silently discard it.
+
+## Typing
+
+- Use typed languages and variants from the outset: TypeScript over JavaScript, typed Python (type hints + mypy/pyright), etc.
+- When creating new projects or files, always set up the build system to accommodate typing (e.g., `tsconfig.json` for TypeScript, pyproject.toml for Python type-checking).
+- If adding code to an existing untyped project, introduce typing incrementally — add types to new files and functions you touch, don't rewrite the whole codebase.
+- Prefer strict type-checking settings where the ecosystem supports it (e.g., `"strict": true` in tsconfig).
+
+## Boy Scout Rule
+
+Before committing, glance at the files you touched. If you see something genuinely worth cleaning up, do it:
+- Dead code: unused functions, unreachable branches, commented-out code — delete it, git remembers
+- Unclear names in code you modified — names should reveal intent
+- Files growing past ~500 lines — consider whether they have distinct responsibilities worth splitting
+
+But don't clean up for the sake of it. Don't extract one-line helpers used once. Don't create abstractions for one-time operations. Three similar lines are better than a premature abstraction. If the code reads fine, leave it alone.
 
 ## API integration
 
