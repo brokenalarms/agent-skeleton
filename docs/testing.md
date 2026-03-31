@@ -10,6 +10,11 @@
 - Never skip a failing test. There is no justification for moving on with a test in a broken state — not scope, not time, not relevance. If a test is failing, fix it before doing anything else. Do not disable it, mark it as expected-failure, or defer it to a follow-up.
 - If you can take a human out of the test loop and test changes yourself, so much the better. Use `playwright` or the equivalent for your project to visually verify the changes.
 
+## Test doubles
+
+- Each module MUST have exactly one file for shared test doubles (e.g. `test_helpers_test.go`, `__mocks__/`, `conftest.py`). Never duplicate stub types across test files within the same module or recreate a stub that exists in another module's test helpers. If a stub needs a new field or method, update the canonical definition — do not fork a local copy.
+- If multiple modules need the same test double, promote it to an exported helper in a dedicated test utilities file or package. Do not duplicate stubs across modules.
+
 ## Writing tests
 
 - Each test should include a brief comment stating: what the issue was and how the test proves the fix works. This prevents tests that only test themselves.

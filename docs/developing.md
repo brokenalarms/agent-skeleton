@@ -12,6 +12,14 @@ For bug fix workflow:
 5. **Verify** — run the build and tests, all should pass without modifying the test to fit after the fact.
 6. **Review** — is there a better way to integrate this fix generically so it handles a class of issues, not just the specific one at hand?
 
+## Orchestrator pattern
+
+Prefer compositional orchestrators that tell a readable story. The orchestrator function sequences named function calls — each module owns its domain and encapsulates all logic for it. The orchestrator composes, it does not implement.
+
+- **Modules own domains.** No git commands outside the git module. No verification logic outside verify. No HTTP calls outside the API module. Domain logic stays in the module that owns it.
+- **Orchestrators read as narrative.** The top-level function should read top-to-bottom as a sequence of what happens: init → get task → prepare → execute → verify → finalize. Each step is a named function call, not inline logic.
+- **Helpers are stateless and unit-testable.** Orchestrator functions glue stateless helpers together. Each helper is a pure function that takes inputs and returns outputs, making it independently testable without mocking the world.
+
 ## Code style
 
 - Prefer declarative structure up front (e.g. a config object, map, or table) that then calls a single utility function, rather than imperative branching logic.
