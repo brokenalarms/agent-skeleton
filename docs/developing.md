@@ -30,9 +30,9 @@ type Manager struct { workDir, branch string; gh GitHubClient; logger Logger; ..
 func (m *Manager) Ship() { m.Push(); m.CreatePR(); m.AwaitCI() }
 func (m *Manager) Push() { m.Rebase(); m.Squash(); m.ForcePush() }
 
-// Right: functions that compose, taking only what they need
+// Right: Public API that composes internal private helpers, taking only what they need
 // GitHub client is internal to the git module — it's part of the domain
-func ship(opts ShipOpts) (ShipResult, error) {
+func Ship(opts ShipOpts) (ShipResult, error) {
     push(opts.WorkDir, opts.Branch, opts.BaseRef)
     createPR(opts.PRTitle, opts.PRBody)  // uses module-internal gh client
 }
