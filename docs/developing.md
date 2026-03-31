@@ -31,13 +31,14 @@ func (m *Manager) Ship() { m.Push(); m.CreatePR(); m.AwaitCI() }
 func (m *Manager) Push() { m.Rebase(); m.Squash(); m.ForcePush() }
 
 // Right: functions that compose, taking only what they need
-func ship(runner CmdRunner, gh GitHubAPI, opts ShipOpts) (ShipResult, error) {
-    push(runner, opts.WorkDir, opts.Branch, opts.BaseRef)
-    createPR(gh, opts.PRTitle, opts.PRBody)
+// GitHub client is internal to the git module — it's part of the domain
+func ship(opts ShipOpts) (ShipResult, error) {
+    push(opts.WorkDir, opts.Branch, opts.BaseRef)
+    createPR(opts.PRTitle, opts.PRBody)  // uses module-internal gh client
 }
-func push(runner CmdRunner, workDir, branch, baseRef string) error {
-    rebase(runner, workDir, baseRef)
-    squash(runner, workDir, baseRef, branch)
+func push(workDir, branch, baseRef string) error {
+    rebase(workDir, baseRef)
+    squash(workDir, baseRef, branch)
 }
 ```
 
