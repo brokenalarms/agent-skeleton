@@ -15,6 +15,7 @@
 - Each test should include a brief comment stating: what the issue was and how the test proves the fix works. This prevents tests that only test themselves.
 - Tests should have a specific feature-based meaning, and shouldn't just be written to be correct (e.g. `assert 1 == true`).
 - Do not write tests that assert specific strings or phrases from prompt templates, `.md` files, or test output. String-based assertions are inherently brittle. Tests should verify behavior and functionality, not pin down prose.
+- Test effects, not implementation. Never assert on code names, string literals in source, enum member names, or internal structure. Test that the behavior works: calling the function produces the right result, the UI shows the right state, the API returnt he right response. A test that checks "no command starts with 'activate'" is testing how the code looks, not what it does.
 - It is a code smell if you are adding many test fixtures that mock a test world. Tests should exercise real-life conditions from the actual production code, not an elaborate fake environment.
 
 ## What to test
