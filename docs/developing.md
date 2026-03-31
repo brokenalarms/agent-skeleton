@@ -12,13 +12,42 @@ For bug fix workflow:
 5. **Verify** — run the build and tests, all should pass without modifying the test to fit after the fact.
 6. **Review** — is there a better way to integrate this fix generically so it handles a class of issues, not just the specific one at hand?
 
+## Module encapsulation
+
+Modules are sealed boundaries. Each module exposes public functions that take only what they need as parameters and return results. A module cannot reach back out into the calling context — it has no reference to the orchestrator, no handle to a shared state object, no way to call into other modules unless the orchestrator explicitly passes a dependency as a parameter.
+
+**No god objects.** A struct that holds the world (config, logger, clients, state) and gets passed everywhere is the most common way encapsulation breaks down. When every function is a method on a `Manager` or `Context` that contains everything, any method can call any other method, access any field, and mutate any state. There are no boundaries — it's all `m.something()`. This defeats the purpose of separating code into modules.
+
+The fix is not to pass smaller interfaces of the same god object (that treats the symptom). The fix is:
+- **Functions take what they need as parameters.** `Push` doesn't need a Manager — it needs a working directory, a branch name, and a way to run commands. Pass those directly.
+- **Functions return results, not side effects.** The caller decides what to do with the result. The function doesn't reach into shared state to record it.
+- **Package privacy is the encapsulation boundary.** Private functions within a module compose into public functions. The public functions are the module's API. Nothing outside the module can call the private functions or access private state.
+- **State is data that flows through parameters**, not something owned by a struct that everything hangs off of. A thin adapter can hold config and delegate to the module's functions if needed, but the functions themselves don't depend on it.
+
+```
+// Wrong: god object where everything can call everything
+type Manager struct { workDir, branch string; gh GitHubClient; logger Logger; ... }
+func (m *Manager) Ship() { m.Push(); m.CreatePR(); m.AwaitCI() }
+func (m *Manager) Push() { m.Rebase(); m.Squash(); m.ForcePush() }
+
+// Right: functions that compose, taking only what they need
+func ship(runner CmdRunner, gh GitHubAPI, opts ShipOpts) (ShipResult, error) {
+    push(runner, opts.WorkDir, opts.Branch, opts.BaseRef)
+    createPR(gh, opts.PRTitle, opts.PRBody)
+}
+func push(runner CmdRunner, workDir, branch, baseRef string) error {
+    rebase(runner, workDir, baseRef)
+    squash(runner, workDir, baseRef, branch)
+}
+```
+
 ## Orchestrator pattern
 
-Prefer compositional orchestrators that tell a readable story. The orchestrator function sequences named function calls — each module owns its domain and encapsulates all logic for it. The orchestrator composes, it does not implement.
+The orchestrator is the only place where modules meet. It sequences named function calls that read as a narrative: init → get task → prepare → execute → verify → finalize. Each step is a call into a module, passing in what it needs, getting back a result.
 
-- **Modules own domains.** No git commands outside the git module. No verification logic outside verify. No HTTP calls outside the API module. Domain logic stays in the module that owns it.
-- **Orchestrators read as narrative.** The top-level function should read top-to-bottom as a sequence of what happens: init → get task → prepare → execute → verify → finalize. Each step is a named function call, not inline logic.
-- **Helpers are stateless and unit-testable.** Orchestrator functions glue stateless helpers together. Each helper is a pure function that takes inputs and returns outputs, making it independently testable without mocking the world.
+- **Modules are composed, not connected.** The orchestrator calls module A, takes its result, and passes it to module B. Module A and module B have no knowledge of each other. If they need to interact, the orchestrator mediates.
+- **Orchestrators read as narrative.** The top-level function should read top-to-bottom as a story of what happens. Each step is a named function call, not inline logic.
+- **Modules own their domains.** No git commands outside the git module. No HTTP calls outside the API module. Domain logic stays in the module that owns it.
 
 ## Code style
 
