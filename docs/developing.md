@@ -85,6 +85,38 @@ But don't clean up for the sake of it. Don't extract one-line helpers used once.
 
 - Never assume the shape of an API response. Before writing code against a third-party API, make a test call with a real payload and inspect what it actually returns. Do not guess property names, nesting, or the presence of flags — APIs frequently omit fields you'd expect or structure them differently than the docs suggest.
 
+## Ralph integration
+
+Projects using ralph as an autonomous agent need two npm scripts (or Makefile targets) that ralph calls during its loop:
+
+- **`ralph:verify`** — Run after code changes to validate correctness. Should include typecheck, build, and all test suites. Ralph uses the exit code to decide whether to iterate or ship.
+- **`ralph:post-task`** — Run after a task is completed and merged. Used for project-specific deployment steps (e.g., rebuilding a local app, restarting a service). This is where `scripts/sync-and-build.sh` should be called to sync with remote, wait for CI version tags, and rebuild.
+
+Example npm scripts:
+```json
+{
+  "ralph:verify": "npm run typecheck && npm run build && npm test",
+  "ralph:post-task": "./scripts/sync-and-build.sh && npm run build"
+}
+```
+
+Example Makefile targets:
+```makefile
+ralph-verify:
+	$(MAKE) typecheck build test
+
+ralph-post-task:
+	./scripts/sync-and-build.sh && $(MAKE) build
+```
+
+The `scripts/sync-and-build.sh` script handles the git sync and version tag flow:
+1. Pull latest with rebase
+2. Push any local commits
+3. Wait for CI to create a version tag (exponential backoff)
+4. Export `PROJECT_VERSION` and `PROJECT_BUILD_NUMBER` for downstream build scripts
+
+The `.github/workflows/version-tag.yml` workflow auto-creates patch version tags on every push to main. This is what `sync-and-build.sh` waits for.
+
 ## Environment awareness
 
 - You may be in a macOS or Linux environment. If commands don't work when you first run them, note which ones work for which environment.
