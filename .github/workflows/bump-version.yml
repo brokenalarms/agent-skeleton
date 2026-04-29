@@ -1,0 +1,50 @@
+name: Bump version on push to main
+
+# Bumps package.json patch version once per push to main, commits with
+# [skip ci], creates a matching vX.Y.Z tag, and pushes both back. Replaces
+# any commit-side bump hook — git locks the source SHA before pre-push
+# fires, so a hook-side --amend cannot ship its own commit.
+#
+# Self-trigger guard: the bump commit message ends with [skip ci] and the
+# job `if:` skips when the head commit message contains that marker, so
+# the workflow never re-fires on its own commit.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  bump:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump, commit, tag, push
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No package.json — nothing to bump"
+            exit 0
+          fi
+
+          current=$(jq -r .version package.json)
+          IFS='.' read -r major minor patch <<< "$current"
+          next="${major}.${minor}.$((patch + 1))"
+
+          tmp=$(mktemp)
+          jq --indent 2 --arg v "$next" '.version = $v' package.json > "$tmp"
+          mv "$tmp" package.json
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump version $current → $next [skip ci]"
+          git tag "v$next"
+          git push origin HEAD:main "v$next"
+
+          echo "Bumped $current → $next, tagged v$next"

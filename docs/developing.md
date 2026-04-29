@@ -115,7 +115,9 @@ The `scripts/sync-and-build.sh` script handles the git sync and version tag flow
 3. Wait for CI to create a version tag (exponential backoff)
 4. Export `PROJECT_VERSION` and `PROJECT_BUILD_NUMBER` for downstream build scripts
 
-The `.github/workflows/version-tag.yml` workflow auto-creates patch version tags on every push to main. This is what `sync-and-build.sh` waits for.
+The `.github/workflows/bump-version.yml` workflow bumps `package.json` patch on every push to main, commits the bump with `[skip ci]`, tags it `vX.Y.Z`, and pushes both back. The `[skip ci]` marker plus the job's `if:` guard prevents the workflow from re-firing on its own commit. This is what `sync-and-build.sh` waits for.
+
+If a fork doesn't have a `package.json`, the workflow no-ops cleanly. Drop one in (even just `{ "version": "0.0.0" }`) to enable bumping.
 
 ## Environment awareness
 
